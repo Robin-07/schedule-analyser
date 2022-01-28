@@ -15,12 +15,15 @@ body{
 }
 
 .chart-controls-container{
-    margin-bottom: 20px;
     width: 200px;
 }
 
 .chart-controls{
-    width: 200px;
+    width: 15vw;
+    height: 12vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
     background-color: white;
     padding: 20px;
     padding-top: 5px;
@@ -37,13 +40,11 @@ body{
 
 .chart-controls-title{
     font: 600 1em 'candara'; 
-    margin-bottom: 5px;
-    margin-top: 5px;
 }
 
 .chart-container{
-    width: 800px;
-    height: 800px;
+    width: 100vw;
+    height: 100vh;
 }
 
 .recharts-pie-sector{

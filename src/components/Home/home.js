@@ -33,8 +33,8 @@ export default function Home(){
         } = props;
         const sin = Math.sin(-RADIAN * midAngle);
         const cos = Math.cos(-RADIAN * midAngle);
-        const sx = cx + (outerRadius - 215) * cos;
-        const sy = cy + (outerRadius - 215) * sin;
+        const sx = cx + (outerRadius - 220) * cos;
+        const sy = cy + (outerRadius - 220) * sin;
         return (
           <Sector
             cx={sx}
@@ -93,7 +93,7 @@ export default function Home(){
       let to = (hour + (3 - (hour % 3))) % 12;
       if(from === 0) from = 12;
       if(to === 0) to = 12;
-      return from + (hour < 15 ? 'am' : 'pm') + ' to ' + to + (hour > 9 ? 'pm' : 'am');
+      return from + (hour < 12 ? 'am' : 'pm') + ' to ' + to + (hour >= 9 && hour < 21 ? 'pm' : 'am');
     }
 
     useEffect(() => {
@@ -159,8 +159,7 @@ export default function Home(){
                     dataKey="value"
                 >
                     {displayData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} 
-                    onClick={(e) => console.log(e)}/>
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                 </Pie>
                 <Legend
