@@ -2,7 +2,7 @@
   "name": "schedule-analyser",
   "version": "0.1.0",
   "proxy": "https://jsonkeeper.com",
-  "homepage": "https://Robin-07.github.io/",
+  "homepage": "https://Robin-07.github.io/schedule-analyser",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
