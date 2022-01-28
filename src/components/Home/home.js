@@ -98,7 +98,7 @@ export default function Home(){
 
     useEffect(() => {
         if(data.length === 0){
-            axios.get('/b/HU8U/')
+            axios.get('https://jsonkeeper.com/b/HU8U/')
             .then((response) => {
               setData(response.data);
               setShowLoader(false)
