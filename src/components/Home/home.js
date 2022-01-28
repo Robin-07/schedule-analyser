@@ -17,19 +17,6 @@ export default function Home(){
     }, []);
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-    const RADIAN = Math.PI / 180;
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, name, value}) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-        <text x={x} y={y} fill="black" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
-        {name}&nbsp;{`(${value})`}
-        </text>
-    );
-    };
-
     const renderActiveShape = props => {
         const RADIAN = Math.PI / 180;
         const {
@@ -43,8 +30,8 @@ export default function Home(){
         } = props;
         const sin = Math.sin(-RADIAN * midAngle);
         const cos = Math.cos(-RADIAN * midAngle);
-        const sx = cx + (outerRadius - 40) * cos;
-        const sy = cy + (outerRadius - 40) * sin;
+        const sx = cx + (outerRadius - 215) * cos;
+        const sy = cy + (outerRadius - 215) * sin;
         return (
           <Sector
             cx={sx}
@@ -53,35 +40,22 @@ export default function Home(){
             outerRadius={outerRadius}
             startAngle={startAngle}
             endAngle={endAngle}
-            fill="red"
+            fill={COLORS[activeIndex % COLORS.length]}
           />
         );
       };
       
-
-    function getIntroOfPage(label) {
-        if (label === 'Page A') {
-          return "Page A is about men's clothing";
-        } if (label === 'Page B') {
-          return "Page B is about women's dress";
-        } if (label === 'Page C') {
-          return "Page C is about women's bag";
-        } if (label === 'Page D') {
-          return 'Page D is about household goods';
-        } if (label === 'Page E') {
-          return 'Page E is about food';
-        } if (label === 'Page F') {
-          return 'Page F is about baby food';
-        }
-      }
-
-    function CustomTooltip({ payload, label, active }) {
+    function CustomTooltip({ payload, active }) {
         if (active) {
           return (
             <div className="custom-tooltip">
-              <p className="label">{`${label} : ${payload[0].value}`}</p>
-              <p className="intro">{getIntroOfPage(label)}</p>
-              <p className="desc">Anything you want can be displayed here.</p>
+              <p className="tooltip-date">Date : {payload[0].name}</p>
+              <p>Total Meals scheduled : {payload[0].value}</p>
+              <p className="intro">Schedule by time slots</p>
+              <ul>
+                {Object.keys(mealsByTimeSlots[payload[0].name]).map(((timeSlot, index) => 
+                  <li key = {index}>{timeSlot} : {mealsByTimeSlots[payload[0].name][timeSlot]}</li>))}
+              </ul>
             </div>
           );
         }
@@ -90,8 +64,8 @@ export default function Home(){
       }
 
     const processDate = (date) => {
-        // Converting date from mm/dd/yyyy to string yyyy-mm-dd in order 
-        // to be able to compare it with JSON data.
+        /* Converting date from mm/dd/yyyy to string yyyy-mm-dd in order 
+         to be able to compare it with JSON data */
         let year = date.getFullYear().toString();
         let month = (date.getMonth() + 1).toString();
         let day = date.getDate().toString();
@@ -104,9 +78,19 @@ export default function Home(){
     const [displayData, setDisplayData] = useState([]);
     const [selectedDate, setSelectedDate] = useState(() => {
         const d = new Date();
-        d.setFullYear(2021, 4 , 19);
+        d.setFullYear(2021, 9 , 2);
         return d;
     });
+    const [mealsByTimeSlots, setMealsByTimeSlots] = useState({});
+
+    const getTimeSlot = (schedule_time) => {
+      let hour = Number(schedule_time.substring(0,2));
+      let from = (hour - (hour % 3)) % 12;
+      let to = (hour + (3 - (hour % 3))) % 12;
+      if(from === 0) from = 12;
+      if(to === 0) to = 12;
+      return from + (hour < 15 ? 'am' : 'pm') + ' to ' + to + (hour > 9 ? 'pm' : 'am');
+    }
 
     useEffect(() => {
         if(data.length === 0){
@@ -118,27 +102,36 @@ export default function Home(){
             let selected_date = processDate(selectedDate);
             const newData = [];
             const count = {};
+            const newMealsByTimeSlots = {};
             for(const item of data){
                 if(selected_date === item.item_date) {
                     let schedule_date = item.schedule_time.split(' ')[0];
                     let schedule_time = item.schedule_time.split(' ')[1];
-                    if(count[schedule_date]) count[schedule_date]++;
-                    else count[schedule_date] = 1;
+                    let timeSlot = getTimeSlot(schedule_time);
+                    if(count[schedule_date]) count[schedule_date]++; 
+                    else{ 
+                      count[schedule_date] = 1;
+                      newMealsByTimeSlots[schedule_date] = {};
+                      newMealsByTimeSlots[schedule_date][timeSlot] = 0;
+                    }
+                    newMealsByTimeSlots[schedule_date][timeSlot]++;
                 }
             }
             for(const scheduleDate of Object.keys(count)){
                 newData.push({name: scheduleDate, value: count[scheduleDate]});
             }
             setDisplayData(newData);
+            setMealsByTimeSlots(newMealsByTimeSlots);
         }
-    },[selectedDate, data]);
+    },[selectedDate, data, setMealsByTimeSlots]);
 
     return(
         <div className = 'container'>
-            <div className = 'date-picker-container'>
-                <div className = 'date-picker'>
-                <div class = 'date-picker-title'>Select Date</div>
+            <div className = 'chart-controls-container'>
+                <div className = 'chart-controls'>
+                <div className = 'chart-controls-title'>Select Date</div>
                 <ReactDatePicker selected = {selectedDate} onChange = {(date) => setSelectedDate(date)}/>
+                <div className='chart-controls-title'>Select Chart Type</div>
                 </div>
             </div>
             <ResponsiveContainer width="100%" height="100%">
@@ -149,7 +142,6 @@ export default function Home(){
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={renderCustomizedLabel}
                     activeShape={renderActiveShape}
                     onMouseOver={onMouseOver}
                     onMouseLeave={onMouseLeave}
