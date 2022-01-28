@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/schedule-analyser/static/css/main.b2dd1d62.css",
+    "main.js": "/schedule-analyser/static/js/main.c90621dc.js",
+    "index.html": "/schedule-analyser/index.html",
+    "main.b2dd1d62.css.map": "/schedule-analyser/static/css/main.b2dd1d62.css.map",
+    "main.c90621dc.js.map": "/schedule-analyser/static/js/main.c90621dc.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b2dd1d62.css",
+    "static/js/main.c90621dc.js"
+  ]
+}
