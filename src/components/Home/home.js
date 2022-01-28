@@ -1,21 +1,24 @@
 import React from "react";
 import { useEffect, useState, useCallback } from "react";
 import axios from 'axios';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector, Legend } from 'recharts';
 import ReactDatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
+import { Rings } from  'react-loader-spinner';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import './home.css';
 
 export default function Home(){
 
     const [activeIndex, setActiveIndex] = useState(null);
+    const [showLoader, setShowLoader] = useState(true);
     const onMouseOver = useCallback((data, index) => {
         setActiveIndex(index);
     }, []);
     const onMouseLeave = useCallback((data, index) => {
         setActiveIndex(null);
     }, []);
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#dd4477', '#6633cc', '#3b3eac'];
 
     const renderActiveShape = props => {
         const RADIAN = Math.PI / 180;
@@ -49,11 +52,12 @@ export default function Home(){
         if (active) {
           return (
             <div className="custom-tooltip">
-              <p className="tooltip-date">Date : {payload[0].name}</p>
+              <p className="tooltip-head">Date : {payload[0].name}</p>
               <p>Total Meals scheduled : {payload[0].value}</p>
-              <p className="intro">Schedule by time slots</p>
+              <p className="tooltip-head">Schedule by time slots</p>
               <ul>
-                {Object.keys(mealsByTimeSlots[payload[0].name]).map(((timeSlot, index) => 
+                {Object.keys(mealsByTimeSlots).length !== 0 && 
+                Object.keys(mealsByTimeSlots[payload[0].name]).map(((timeSlot, index) => 
                   <li key = {index}>{timeSlot} : {mealsByTimeSlots[payload[0].name][timeSlot]}</li>))}
               </ul>
             </div>
@@ -95,7 +99,10 @@ export default function Home(){
     useEffect(() => {
         if(data.length === 0){
             axios.get('/b/HU8U/')
-            .then((response) => setData(response.data))
+            .then((response) => {
+              setData(response.data);
+              setShowLoader(false)
+              })
             .catch((error) => console.log(error.response))
         }
         else{
@@ -109,12 +116,12 @@ export default function Home(){
                     let schedule_time = item.schedule_time.split(' ')[1];
                     let timeSlot = getTimeSlot(schedule_time);
                     if(count[schedule_date]) count[schedule_date]++; 
-                    else{ 
-                      count[schedule_date] = 1;
+                    else count[schedule_date] = 1;
+                    if(newMealsByTimeSlots[schedule_date] === undefined)
                       newMealsByTimeSlots[schedule_date] = {};
-                      newMealsByTimeSlots[schedule_date][timeSlot] = 0;
-                    }
-                    newMealsByTimeSlots[schedule_date][timeSlot]++;
+                    if(newMealsByTimeSlots[schedule_date][timeSlot] === undefined)
+                      newMealsByTimeSlots[schedule_date][timeSlot] = 1;
+                    else newMealsByTimeSlots[schedule_date][timeSlot]++;
                 }
             }
             for(const scheduleDate of Object.keys(count)){
@@ -129,13 +136,14 @@ export default function Home(){
         <div className = 'container'>
             <div className = 'chart-controls-container'>
                 <div className = 'chart-controls'>
-                <div className = 'chart-controls-title'>Select Date</div>
+                <div className = 'chart-controls-title'>Select Delivery Date</div>
                 <ReactDatePicker selected = {selectedDate} onChange = {(date) => setSelectedDate(date)}/>
-                <div className='chart-controls-title'>Select Chart Type</div>
                 </div>
-            </div>
+            </div>  
             <ResponsiveContainer width="100%" height="100%">
-                <PieChart width={1000} height={1000}>
+            {showLoader ? <Rings color = '#696969' ariaLabel="Loading"/> :
+            displayData.length === 0 ? <div className = 'no-data'>Data Not Found</div> :
+                <PieChart width={800} height={800}>
                 <Pie
                     activeIndex={activeIndex}
                     data={displayData}
@@ -155,8 +163,20 @@ export default function Home(){
                     onClick={(e) => console.log(e)}/>
                     ))}
                 </Pie>
+                <Legend
+                  payload={
+                    displayData.map(
+                      (item, index) => ({
+                        id: item.name,
+                        type: "circle",
+                        value: `${item.name} (${item.value})`,
+                        color: COLORS[index % COLORS.length]
+                      })
+                    )
+                  }
+                />
                 <Tooltip content={<CustomTooltip />}/>
-                </PieChart>
+                </PieChart>}
             </ResponsiveContainer>
         </div>
     );
