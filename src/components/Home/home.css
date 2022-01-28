@@ -1,0 +1,34 @@
+body{
+    overflow: hidden;
+    background-color:	#F0F0F0;
+    font-family: 'candara';
+}
+
+.container{
+    width: 100vw;
+    height: 90vh;
+}
+
+.date-picker-container{
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+}
+
+.date-picker{
+    width: max-content;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    border-radius: 5px 5px 5px 5px;
+    cursor: pointer;
+}
+
+.date-picker:hover{
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.date-picker-title{
+    font: 600 1em 'candara'; 
+}
